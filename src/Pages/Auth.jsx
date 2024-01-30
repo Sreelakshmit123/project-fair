@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { registerAPI } from '../Services/allAPIs';
+import { loginAPI, registerAPI } from '../Services/allAPIs';
 
 
 function Auth({insideRegister}) {
@@ -38,6 +38,30 @@ function Auth({insideRegister}) {
     }
 
   }
+
+  const handleLogin = async (e)=>{
+    e.preventDefault()
+    const {email,password} = userData
+    if(!email || !password){
+      toast.info("Please fill the form completly!!")
+    }else{
+      try{
+          const result = await loginAPI({email,password})
+          console.log(result);
+          if(result.status===200){
+            sessionStorage.setItem("username",result.data.exisitngUser.username)
+            sessionStorage.setItem("token",result.data.token)
+            setUserData({email:"",password:""})
+            navigate('/')
+          }else{
+            toast.warning(result.response.data)
+          }
+      }catch{
+        console.log(err);
+      }
+    }
+  }
+
   return (
     <div style={{width:'100%', height:'100vh'}} className='d-flex justify-content-center align-items-center'>
       <div className="container w-75">
@@ -74,7 +98,7 @@ function Auth({insideRegister}) {
         <p>Already have an Account? click here to <Link to={'/login'}>Login</Link></p>
       </div>:
       <div>
-       <button className='btn btn-light mb-2'>Login</button>
+       <button onClick={handleLogin} className='btn btn-light mb-2'>Login</button>
        <p>New User? click here to <Link to={'/register'}>Register</Link></p>
      </div>
     }
